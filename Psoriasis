@@ -1,52 +1,37 @@
-# https://github.com/rnnh/bioinfo-notebook.git
+
 
 # Loading required libraries
 library(limma)
 library(edgeR)
 
-# Changing working directory
-# Setting the working directory to the directory which contains this script
-if (exists("RStudio.Version")){
-  setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
-} else {
-  setwd(getSrcDirectory()[1])
-}
 
 # Reading in the feature count file as "counts.df"
-counts.df <- read.csv("../data/featCounts_S_cere_20200331.csv")
+counts.df <- read.table("raw_counts.tsv", header=TRUE, row.names="Gene ID", sep="\t", check.names = F)
 
 # Printing the start of the counts.df object in R...
 head(counts.df)
 
 # Using the "Geneid" column to set the rownames
-rownames(counts.df) <- counts.df$Geneid
+rownames(counts.df) <- counts.df$Gene_Name
 
-# Removing the "Geneid" column
-counts.df$Geneid <- NULL
+# Removing the "Gene Name" column
+counts.df$Gene_Name <- NULL
 
 # Printing the start of the counts.df object in R...
 head(counts.df)
 
 # Reading in the design table as "design.df"
-design.df <- read.csv("../data/design_table.csv", fileEncoding="UTF-8-BOM")
+design.df <- read.csv("experimental_design.csv", fileEncoding="UTF-8-BOM")
 
 # Printing the start of the design.df object in R...
 print(design.df)
 
 # Subsetting gene counts according to experimental condition
-counts_standard.df  <- counts.df[,c("SRR8933535", "SRR8933536", "SRR8933537")]
-counts_anaerobic.df <- counts.df[,c("SRR8933506", "SRR8933511", "SRR8933512")]
-counts_high_temp.df <- counts.df[,c("SRR8933532", "SRR8933533", "SRR8933534")]
-counts_low_pH.df    <- counts.df[,c("SRR8933530", "SRR8933531", "SRR8933539")]
-counts_pressure.df  <- counts.df[,c("SRR8933509", "SRR8933510", "SRR8933538")]
+counts_normal.df  <- counts.df[,c("SRR1146076", "SRR1146085", "SRR1146086", "SRR1146087", "SRR1146088", "SRR1146089", "SRR1146090", "SRR1146091", "SRR1146092", "SRR1146093", "SRR1146094", "SRR1146095", "SRR1146096", "SRR1146097", "SRR1146098", "SRR1146099", "SRR1146100", "SRR1146101", "SRR1146102", "SRR1146103", "SRR1146104", "SRR1146105", "SRR1146106", "SRR1146107", "SRR1146108", "SRR1146109", "SRR1146110", "SRR1146111", "SRR1146112", "SRR1146113", "SRR1146114", "SRR1146115", "SRR1146116", "SRR1146117", "SRR1146118", "SRR1146119", "SRR1146120", "SRR1146121", "SRR1146122", "SRR1146123", "SRR1146124", "SRR1146125", "SRR1146126", "SRR1146127", "SRR1146128", "SRR1146129", "SRR1146130", "SRR1146131", "SRR1146132", "SRR1146133", "SRR1146134", "SRR1146135", "SRR1146136", "SRR1146137", "SRR1146138", "SRR1146139", "SRR1146140", "SRR1146141", "SRR1146142", "SRR1146143", "SRR1146144", "SRR1146145", "SRR1146146", "SRR1146147", "SRR1146148", "SRR1146149", "SRR1146150", "SRR1146151", "SRR1146152", "SRR1146153", "SRR1146154", "SRR1146155", "SRR1146156", "SRR1146157", "SRR1146158", "SRR1146159", "SRR1146160", "SRR1146161", "SRR1146162", "SRR1146163", "SRR1146164", "SRR1146165", "SRR1146166", "SRR1146167")]
+counts_psoriasis.df <- counts.df[,c("SRR1146168", "SRR1146169", "SRR1146170", "SRR1146171", "SRR1146172", "SRR1146173", "SRR1146174", "SRR1146175", "SRR1146176", "SRR1146177", "SRR1146178", "SRR1146179", "SRR1146180", "SRR1146181", "SRR1146182", "SRR1146183", "SRR1146184", "SRR1146185", "SRR1146186", "SRR1146187", "SRR1146188", "SRR1146189", "SRR1146190", "SRR1146191", "SRR1146192", "SRR1146193", "SRR1146194", "SRR1146195", "SRR1146196", "SRR1146197", "SRR1146198", "SRR1146199", "SRR1146200", "SRR1146201", "SRR1146202", "SRR1146203", "SRR1146204", "SRR1146205", "SRR1146206", "SRR1146207", "SRR1146208", "SRR1146209", "SRR1146210", "SRR1146211", "SRR1146212", "SRR1146213", "SRR1146214", "SRR1146215", "SRR1146216", "SRR1146217", "SRR1146218", "SRR1146219", "SRR1146220", "SRR1146221", "SRR1146222", "SRR1146223", "SRR1146224", "SRR1146225", "SRR1146226", "SRR1146227", "SRR1146228", "SRR1146229", "SRR1146230", "SRR1146231", "SRR1146232", "SRR1146233", "SRR1146234", "SRR1146235", "SRR1146236", "SRR1146237", "SRR1146238", "SRR1146239", "SRR1146240", "SRR1146241", "SRR1146242", "SRR1146243", "SRR1146244", "SRR1146245", "SRR1146246", "SRR1146247", "SRR1146248", "SRR1146249", "SRR1146250", "SRR1146251", "SRR1146252", "SRR1146253", "SRR1146254")]
 
 # Printing the structure of the gene counts set and subsets
 str(counts.df)
-str(counts_standard.df)
-str(counts_anaerobic.df)
-str(counts_high_temp.df)
-str(counts_low_pH.df)
-str(counts_pressure.df)
 
 # Defining function "RSD.test()"
 RSD.test <- function(dataframe){
@@ -68,30 +53,15 @@ RSD.test <- function(dataframe){
 }
 
 # Applying RSD.test() to gene count subsets
-counts_standard.df  <- RSD.test(counts_standard.df)
-counts_anaerobic.df <- RSD.test(counts_anaerobic.df)
-counts_high_temp.df <- RSD.test(counts_high_temp.df)
-counts_low_pH.df    <- RSD.test(counts_low_pH.df)
-counts_pressure.df  <- RSD.test(counts_pressure.df)
+counts_normal.df <- RSD.test(counts_normal.df)
+counts_psoriasis.df <- RSD.test(counts_psoriasis.df)
 
-# Printing the structure of the gene counts subsets
-str(counts_standard.df)
-str(counts_anaerobic.df)
-str(counts_high_temp.df)
-str(counts_low_pH.df)
-str(counts_pressure.df)
 
 # Creating list of genes which failed RSD test
-RSD_failed_genes <- rownames(counts_standard.df[
-  which(counts_standard.df$RSD.test == FALSE),])
-RSD_failed_genes <- append(RSD_failed_genes, rownames(counts_anaerobic.df[
-  which(counts_anaerobic.df$RSD.test == FALSE),]))
-RSD_failed_genes <- append(RSD_failed_genes, rownames(counts_high_temp.df[
-  which(counts_high_temp.df$RSD.test == FALSE),]))
-RSD_failed_genes <- append(RSD_failed_genes, rownames(counts_low_pH.df[
-  which(counts_low_pH.df$RSD.test == FALSE),]))
-RSD_failed_genes <- append(RSD_failed_genes, rownames(counts_pressure.df[
-  which(counts_pressure.df$RSD.test == FALSE),]))
+RSD_failed_genes <- rownames(counts_normal.df[
+  which(counts_normal.df$RSD.test == FALSE),])
+RSD_failed_genes <- append(RSD_failed_genes, rownames(counts_psoriasis.df[
+  which(counts_psoriasis.df$RSD.test == FALSE),]))
 RSD_failed_genes <- unique(RSD_failed_genes)
 length(RSD_failed_genes)
 
@@ -105,9 +75,6 @@ str(filtered_counts.df)
 # Checking that gene counts were correctly filtered
 nrow(counts.df) - length(RSD_failed_genes) == nrow(filtered_counts.df)
 
-# Removing redundant objects from R environment
-rm(counts_anaerobic.df, counts_high_temp.df, counts_low_pH.df,
-   counts_pressure.df, counts_standard.df, counts.df, RSD_failed_genes)
 
 # Creating a DGEList object using the filtered gene counts
 counts.DGEList <- DGEList(counts = filtered_counts.df,
@@ -160,14 +127,11 @@ counts.DGEList
 condition_
 
 # Exact tests for differences between experimental conditions
-std_anaerobic.DGEExact <- exactTest(counts.DGEList, pair = c("standard",
-                                                             "anaerobic"))
-std_salt.DGEExact <- exactTest(counts.DGEList, pair = c("standard",
+std_normal.DGEExact <- exactTest(counts.DGEList, pair = c("standard",
+                                                             "normal"))
+std_psoriasis.DGEExact <- exactTest(counts.DGEList, pair = c("standard",
                                                         "osmotic_pressure"))
-std_temp.DGEExact <- exactTest(counts.DGEList, pair = c("standard",
-                                                        "high_temp"))
-std_pH.DGEExact <- exactTest(counts.DGEList, pair = c("standard",
-                                                      "low_pH"))
+
 
 # Extracting most differentially expressed genes from exact tests
 std_anaerobic.topTags <- topTags(std_anaerobic.DGEExact)
